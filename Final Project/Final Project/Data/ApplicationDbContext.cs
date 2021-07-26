@@ -22,5 +22,6 @@ namespace Final_Project.Data
         public DbSet<Job> Jobs { get; set; }
         public DbSet<WorkingHours> WorkingHours { get; set; }
         public DbSet<WorkingDays> WorkingDays { get; set; }
+
     }
 }

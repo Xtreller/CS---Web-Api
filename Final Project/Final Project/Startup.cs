@@ -1,6 +1,7 @@
 using Final_Project.Data;
 using Final_Project.Models;
 using Final_Project.Services;
+using Final_Project.Services.User;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -28,7 +29,6 @@ namespace Final_Project
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
@@ -47,8 +47,13 @@ namespace Final_Project
                                       builder.WithOrigins(MyAllowSpecificOrigins).AllowAnyHeader().AllowAnyMethod();
                                   });
             });
+
+            services.AddAuthentication()
+            .AddIdentityServerJwt();
+
             services.AddControllersWithViews();
-            services.AddTransient<IGarageService,GarageService>();
+            services.AddTransient<IGarageService, GarageService>();
+            services.AddTransient<IUserService, UserService>();
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
@@ -69,10 +74,14 @@ namespace Final_Project
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseIdentityServer();
+
             app.UseCors(MyAllowSpecificOrigins);
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapDefaultControllerRoute();
+                endpoints.MapRazorPages(); 
                 endpoints.MapControllerRoute(
                   name: "default",
                   pattern: "{controller=Home}/{action=Index}/{id?}");

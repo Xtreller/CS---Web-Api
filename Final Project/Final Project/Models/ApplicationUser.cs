@@ -8,5 +8,6 @@ namespace Final_Project.Models
 {
     public class ApplicationUser : IdentityUser
     {
+
     }
 }
