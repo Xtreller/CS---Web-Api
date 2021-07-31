@@ -1,7 +1,6 @@
 using Final_Project.Data;
 using Final_Project.Models;
 using Final_Project.Services;
-using Final_Project.Services.User;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

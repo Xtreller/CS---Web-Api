@@ -1,6 +1,6 @@
 ﻿using Final_Project.Data;
 using Final_Project.Models;
-using Final_Project.Services.User;
+using Final_Project.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -22,22 +22,35 @@ namespace Final_Project.Controllers.User
             this.userService = userService;
         }
         // GET: api/<UserController>
-        
+
 
         // GET api/user/:id
         [HttpGet("{id}")]
         public ActionResult Get(string id)
         {
-            return Ok(userService.getUser(id));
+            return Ok(userService.GetUserById(id));
 
         }
 
         // POST api/<UserController>
         [HttpPost("register")]
-        public ApplicationUser Post([FromBody]ApplicationUser input)
+        public ActionResult<ApplicationUser> Register([FromBody] ApplicationUser input)
         {
-            
-            return this.userService.register(input.Email, input.PasswordHash);
+            return this.userService.Register(input);
+
+        }
+
+        [HttpPost("login")]
+        public ActionResult<string> Login([FromBody] ApplicationUser input)
+        {
+            string token;
+            var user = this.userService.Login(input);
+            if (user!=null) {
+                token = GenerateJwt.Generate(user.Id);
+                return token;
+            }
+            return Problem("User not found!");
+
         }
 
         // PUT api/<UserController>/5

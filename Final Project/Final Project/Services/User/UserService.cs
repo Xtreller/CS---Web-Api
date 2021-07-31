@@ -1,51 +1,65 @@
 ﻿using Final_Project.Data;
 using Final_Project.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
-
-namespace Final_Project.Services.User
+public class UserService : IUserService
 {
-    public class UserService : IUserService
+    private ApplicationDbContext db;
+
+    public UserService(ApplicationDbContext dbContext)
     {
-        private ApplicationDbContext db;
-
-        public UserService(ApplicationDbContext dbContext)
-        {
-            this.db = dbContext;
-        }
-        public string deleteUser(string id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public object getUser(string id)
-        {
-            return this.db.Users.Find(id);
-        }
-
-        public string login(string email, string password)
-        {
-            throw new NotImplementedException();
-        }
-
+        this.db = dbContext;
+    }
         
-        public ApplicationUser register(string email, string password)
-        {
-            var user = new ApplicationUser()
-            {
-                Email = email,
-                PasswordHash = password,
-            };
-            this.db.Users.Add(user);
-            return user;
-        }
+    public List<ApplicationUser> all()
+    {
+        return this.db.Users.ToList();
+    }
 
-        public string updateUser(string id, string data)
-        {
-            throw new NotImplementedException();
+    public ApplicationUser GetUserById(string id)
+    {
+       return this.db.Users.Find(id);
+    }
+    public ApplicationUser GetUserByEmail(string email)
+    {
+        return this.db.Users.Where(user=>user.Email == email ).FirstOrDefault();
+    }
+    public ApplicationUser Login(ApplicationUser user)
+    {
+        var findUser = this.GetUserByEmail(user.Email);
+        if (findUser != null) {
+            bool isValidPassword = BCrypt.Net.BCrypt.Verify(user.PasswordHash,findUser.PasswordHash);
+            if (isValidPassword) {
+                return findUser;
+            }
         }
+        return null;
+    }
 
-       
+    public ActionResult Logout()
+    {
+        throw new NotImplementedException();
+    }
+
+    public ApplicationUser Register(ApplicationUser user)
+    {
+        if (this.db.Users.ToArray().Contains(user)) {
+            return null;
+        }
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
+         this.db.Users.Add(user);
+        this.db.SaveChanges();
+        
+        return this.GetUserByEmail(user.Email);
+    }
+
+    public ApplicationUser updateUser(string userId, ApplicationUser newData)
+    {
+        throw new NotImplementedException();
     }
 }
+

@@ -1,18 +1,20 @@
 ﻿using Final_Project.Models;
-using System;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Final_Project.Services.User
+public interface IUserService
 {
-    public interface IUserService
-    {
-         object getUser(string id);
-        string deleteUser(string id);
+    List<ApplicationUser> all();
 
-        ApplicationUser register(string email, string password);
-        string login(string email, string password);
+    ApplicationUser Register(ApplicationUser user);
+    ApplicationUser GetUserById(string id);
+    ApplicationUser GetUserByEmail(string email);
+    ApplicationUser Login(ApplicationUser user);
 
-    }
+    ApplicationUser updateUser(string userId, ApplicationUser newData);
+    ActionResult Logout();
+
+    
+
 }
+
