@@ -1,9 +1,12 @@
 ﻿using Final_Project.Data;
+using Final_Project.InputModels.User;
 using Final_Project.Models;
+using Final_Project.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 
 public class UserService : IUserService
@@ -14,26 +17,29 @@ public class UserService : IUserService
     {
         this.db = dbContext;
     }
-        
-    public List<ApplicationUser> all()
+
+    public List<ApplicationUser> All()
     {
         return this.db.Users.ToList();
     }
 
     public ApplicationUser GetUserById(string id)
     {
-       return this.db.Users.Find(id);
+        return this.db.Users.Find(id);
     }
     public ApplicationUser GetUserByEmail(string email)
     {
-        return this.db.Users.Where(user=>user.Email == email ).FirstOrDefault();
+        return this.db.Users.Where(user => user.Email == email).FirstOrDefault();
     }
-    public ApplicationUser Login(ApplicationUser user)
+    public ApplicationUser Login(LoginInput input)
     {
-        var findUser = this.GetUserByEmail(user.Email);
-        if (findUser != null) {
-            bool isValidPassword = BCrypt.Net.BCrypt.Verify(user.PasswordHash,findUser.PasswordHash);
-            if (isValidPassword) {
+        var findUser = this.GetUserByEmail(input.Email);
+        if (findUser != null)
+        {
+            bool isValidPassword = BCrypt.Net.BCrypt.Verify(input.Password, findUser.PasswordHash);
+            if (isValidPassword)
+            {
+                //GenerateJwt.Generate(findUser.Id);
                 return findUser;
             }
         }
@@ -45,16 +51,26 @@ public class UserService : IUserService
         throw new NotImplementedException();
     }
 
-    public ApplicationUser Register(ApplicationUser user)
+    public ApplicationUser Register(LoginInput input)
     {
-        if (this.db.Users.ToArray().Contains(user)) {
+        if (this.db.Users.ToArray().Any(user => user.Email == input.Email))
+        {
             return null;
         }
-        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
-         this.db.Users.Add(user);
+        input.Password = BCrypt.Net.BCrypt.HashPassword(input.Password);
+        var newUser = new ApplicationUser()
+        {
+            FirstName = input.FirstName,
+            LastName = input.LastName,
+            Email = input.Email,
+            PasswordHash = input.Password,
+            EmailConfirmed = true,
+
+        };
+        this.db.Users.Add(newUser);
         this.db.SaveChanges();
-        
-        return this.GetUserByEmail(user.Email);
+
+        return this.GetUserByEmail(newUser.Email);
     }
 
     public ApplicationUser updateUser(string userId, ApplicationUser newData)

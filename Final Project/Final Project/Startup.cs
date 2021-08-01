@@ -2,6 +2,7 @@ using Final_Project.Data;
 using Final_Project.Models;
 using Final_Project.Services;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -12,11 +13,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Final_Project
 {
     public class Startup
     {
+        string KEY = "YVY63ARFNRIZOS0P85VSO262KC7CYYKSFB5MXBQHBBH7Z2J2XOMT3DXMRNB217TV07751NN2DGBUA3VEATZBHNF9IDH2QDRBL3HO6K2TGFCVVNWTKSKCQDP2YVDKTW2OYV4ZC1N4SZTM";
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -32,7 +36,7 @@ namespace Final_Project
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddIdentityServer()
@@ -47,10 +51,30 @@ namespace Final_Project
                                   });
             });
 
-            services.AddAuthentication()
-            .AddIdentityServerJwt();
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(jwt =>
+            {
+                var key = Encoding.UTF8.GetBytes(KEY);
 
-            services.AddControllersWithViews();
+                jwt.SaveToken = true;
+                jwt.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = false,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    RequireExpirationTime = false
+                };
+            }).AddIdentityServerJwt();
+
+            services.AddAuthorization();
+            services.AddControllers();
             services.AddTransient<IGarageService, GarageService>();
             services.AddTransient<IUserService, UserService>();
             // In production, the React files will be served from this directory
@@ -73,14 +97,19 @@ namespace Final_Project
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+
             app.UseIdentityServer();
 
-            app.UseCors(MyAllowSpecificOrigins);
+            app.UseCors(x => x
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .SetIsOriginAllowed(origin => true) // allow any origin
+            .AllowCredentials());
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();
-                endpoints.MapRazorPages(); 
+                endpoints.MapRazorPages();
                 endpoints.MapControllerRoute(
                   name: "default",
                   pattern: "{controller=Home}/{action=Index}/{id?}");

@@ -1,4 +1,5 @@
 ﻿using Final_Project.Data;
+using Final_Project.InputModels.User;
 using Final_Project.Models;
 using Final_Project.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +23,12 @@ namespace Final_Project.Controllers.User
             this.userService = userService;
         }
         // GET: api/<UserController>
+        [HttpGet("all")]
+        public ActionResult AllUsers(string id)
+        {
+            return Ok(userService.All());
 
+        }
 
         // GET api/user/:id
         [HttpGet("{id}")]
@@ -34,19 +40,19 @@ namespace Final_Project.Controllers.User
 
         // POST api/<UserController>
         [HttpPost("register")]
-        public ActionResult<ApplicationUser> Register([FromBody] ApplicationUser input)
+        public ActionResult<ApplicationUser> Register([FromBody] LoginInput input)
         {
             return this.userService.Register(input);
 
         }
 
         [HttpPost("login")]
-        public ActionResult<string> Login([FromBody] ApplicationUser input)
+        public ActionResult<string> Login([FromBody] LoginInput input)
         {
             string token;
             var user = this.userService.Login(input);
             if (user!=null) {
-                token = GenerateJwt.Generate(user.Id);
+                token = GenerateJwt.GenerateJwtToken(user);
                 return token;
             }
             return Problem("User not found!");
