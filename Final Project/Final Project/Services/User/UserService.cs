@@ -11,10 +11,12 @@ using System.Linq;
 
 public class UserService : IUserService
 {
+    private SignInManager<ApplicationUser> signInManager;
     private ApplicationDbContext db;
 
-    public UserService(ApplicationDbContext dbContext)
+    public UserService(ApplicationDbContext dbContext,SignInManager<ApplicationUser> signInManager)
     {
+        this.signInManager = signInManager;
         this.db = dbContext;
     }
 
@@ -36,6 +38,7 @@ public class UserService : IUserService
         var findUser = this.GetUserByEmail(input.Email);
         if (findUser != null)
         {
+
             bool isValidPassword = BCrypt.Net.BCrypt.Verify(input.Password, findUser.PasswordHash);
             if (isValidPassword)
             {

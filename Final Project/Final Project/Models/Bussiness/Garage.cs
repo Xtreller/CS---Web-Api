@@ -17,7 +17,7 @@ namespace Final_Project.Models
         public int Done_jobs { get; set; }
         public string Town { get; set; }
         public string Address { get; set; }
-        public int Owner_id { get; set; }
+        public string OwnerId { get; set; }
         public ApplicationUser Owner { get; set; }
 
         public ICollection<WorkingDays> WorkingDays{ get; set; }

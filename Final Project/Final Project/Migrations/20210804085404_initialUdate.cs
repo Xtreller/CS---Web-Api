@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Final_Project.Data.Migrations
+namespace Final_Project.Migrations
 {
-    public partial class Initial : Migration
+    public partial class initialUdate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

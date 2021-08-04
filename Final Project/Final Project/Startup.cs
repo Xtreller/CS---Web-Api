@@ -72,16 +72,13 @@ namespace Final_Project
                     RequireExpirationTime = false
                 };
             }).AddIdentityServerJwt();
-
             services.AddAuthorization();
+
             services.AddControllers();
             services.AddTransient<IGarageService, GarageService>();
             services.AddTransient<IUserService, UserService>();
             // In production, the React files will be served from this directory
-            services.AddSpaStaticFiles(configuration =>
-            {
-                configuration.RootPath = "ClientApp/build";
-            });
+           
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -91,20 +88,21 @@ namespace Final_Project
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            
             app.UseHttpsRedirection();
-
-            app.UseRouting();
-            app.UseAuthentication();
-            app.UseAuthorization();
-
             app.UseIdentityServer();
+            app.UseRouting();
+
 
             app.UseCors(x => x
             .AllowAnyMethod()
             .AllowAnyHeader()
             .SetIsOriginAllowed(origin => true) // allow any origin
             .AllowCredentials());
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
 
             app.UseEndpoints(endpoints =>
             {

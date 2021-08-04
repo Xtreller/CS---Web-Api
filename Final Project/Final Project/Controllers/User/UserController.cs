@@ -1,7 +1,9 @@
-﻿using Final_Project.Data;
+﻿using Final_Project.Common;
+using Final_Project.Data;
 using Final_Project.InputModels.User;
 using Final_Project.Models;
 using Final_Project.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -16,10 +18,14 @@ namespace Final_Project.Controllers.User
     [ApiController]
     public class UserController : ControllerBase
     {
+        private SignInManager<ApplicationUser> signInManager;
+        private UserManager<ApplicationUser> userManager;
         private IUserService userService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService,UserManager<ApplicationUser> userManager,SignInManager<ApplicationUser> signInManager)
         {
+            this.signInManager = signInManager;
+            this.userManager = userManager;
             this.userService = userService;
         }
         // GET: api/<UserController>
@@ -47,15 +53,16 @@ namespace Final_Project.Controllers.User
         }
 
         [HttpPost("login")]
-        public ActionResult<string> Login([FromBody] LoginInput input)
+        public async Task<IActionResult> Login([FromBody] LoginInput input)
         {
             string token;
             var user = this.userService.Login(input);
             if (user!=null) {
                 token = GenerateJwt.GenerateJwtToken(user);
-                return token;
+
+                return Ok(new Response() { Data = token,Success=true,User = user });
             }
-            return Problem("User not found!");
+            return BadRequest("User not found!");
 
         }
 

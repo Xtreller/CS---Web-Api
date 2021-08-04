@@ -24,50 +24,17 @@ namespace Final_Project.Services
         {
             _userService = userService;
         }
-        //public static string Generate(string userId)
-        //{
-
-        //    var credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-        //    // Creates a JWS descriptor with all its properties
-        //    var header = new System.IdentityModel.Tokens.Jwt.JwtHeader(credentials);
-
-        //    DateTime ExpiresIn = DateTime.UtcNow.AddDays(1);
-        //    int ts = (int)(ExpiresIn - new DateTime(1997,1,1)).TotalDays;
-
-        //    var payload = new System.IdentityModel.Tokens.Jwt.JwtPayload
-        //    {
-        //        { "userId",userId},
-        //        {"exp",ExpiresIn},
-        //        {"iss","https://localhost:5001"},
-        //        { "aud","https://localhost:5001"},
-
-
-        //    };
-        //    var secToken = new JwtSecurityToken(header, payload);
-        //    var handler = new JwtSecurityTokenHandler();
-        //    var tokenString = handler.WriteToken(secToken);
-
-        //    Console.WriteLine("jwt: " + tokenString);
-        //    return tokenString;
-        //    //    var claims = new[] {
-        //    //        new Claim("id",userId),
-        //    //    };
-        //    //    var token = new JwtSecurityToken("https://localhost:5001", "https://localhost:3000",
-        //    //        claims,
-        //    //        DateTime.UtcNow,
-        //    //        expires: DateTime.Now.AddDays(1),
-        //    //        signingCredentials: credentials);
-
-        //    //    return new JwtSecurityTokenHandler().WriteToken(token);
-        //}
+    
         public static string GenerateJwtToken(ApplicationUser user)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
 
-            var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+            //var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
             var key = Encoding.UTF8.GetBytes(KEY);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
+                Audience = "https://localhost:5001",
+                Issuer = "https://localhost:5001",
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim("Id", user.Id),
@@ -83,6 +50,12 @@ namespace Final_Project.Services
             var jwtToken = jwtTokenHandler.WriteToken(token);
 
             return jwtToken;
+        }
+        public static string DecodeJwt(string token) {
+
+            var handler = new JwtSecurityTokenHandler();
+            var decodedToken = handler.ReadJwtToken(token);
+            return decodedToken.ToString();
         }
     }
 }

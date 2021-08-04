@@ -1,4 +1,5 @@
-﻿using Final_Project.Models;
+﻿using Final_Project.InputModels.Garages;
+using Final_Project.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Final_Project.Services
     {
         public ICollection<Garage> GetGarages();
         public Garage GetGarage(int garageId);
-        public Garage AddGarage(string name, string town, string address);
+        public Garage AddGarage(GarageInput input);
         public Garage UpdateGarage(int garageId, object data);
         public Garage DeleteGarage(int garageId);
 
